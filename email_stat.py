@@ -8,15 +8,35 @@ gmail_password = input("Enter your email password (special for applications): ")
 mail = imaplib.IMAP4_SSL("imap.gmail.com")
 mail.login(gmail_username, gmail_password)
 
-mail.select("INBOX")
+def get_count_of_emails(id, folder_code):
+    mail.select(folder_code)
 
-start_date = datetime(2023, 1, 1)
-end_date = datetime(2023, 12, 31)
+    start_date = datetime(2023, 1, 1)
+    end_date = datetime(2023, 12, 31)
 
-search_criteria = f'(SINCE {start_date.strftime("%d-%b-%Y")}) (BEFORE {end_date.strftime("%d-%b-%Y")})'
+    search_criteria = f'(SINCE {start_date.strftime("%d-%b-%Y")}) (BEFORE {end_date.strftime("%d-%b-%Y")})'
 
-status, messages = mail.search(None, search_criteria)
+    status, messages = mail.search(None, search_criteria)
 
-message_ids = messages[0].split()
+    message_ids = messages[0].split()
 
-print(len(message_ids))
+    result.append([id,len(message_ids)])
+
+
+email_codes = []
+for i in mail.list()[1]:
+    line = i.decode().split(' "/" ')
+    email_codes.append(line)
+
+
+result = []
+
+get_count_of_emails('inbox', email_codes[0][1])
+get_count_of_emails('sent', email_codes[5][1])
+get_count_of_emails('drafts', email_codes[8][1])
+get_count_of_emails('flagged', email_codes[6][1])
+
+print(result)
+
+mail.close()
+mail.logout()
