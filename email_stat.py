@@ -1,5 +1,7 @@
 import imaplib
 from datetime import datetime
+import smtplib
+from email.message import EmailMessage
 
 
 gmail_username = input("Enter your Gmail email address: ")
@@ -129,7 +131,25 @@ content.append("See you at this time next year?")
 for i in content:
     text = text + i + "\n"
 
-print(text)
 
 mail.close()
 mail.logout()
+
+
+gmail_server = "smtp.gmail.com"
+gmail_port = 587
+
+my_server = smtplib.SMTP(gmail_server, gmail_port)
+my_server.ehlo()
+my_server.starttls()
+
+my_server.login(gmail_username, gmail_password)
+msg = EmailMessage()
+msg.set_content(text)
+
+msg['Subject'] = 'THE GMAIL RECAP 2023'
+msg['From'] = gmail_username
+msg['To'] = gmail_username
+
+my_server.send_message(msg)
+print('The GMAIL RECAP 2023 was sent to your inbox!')
