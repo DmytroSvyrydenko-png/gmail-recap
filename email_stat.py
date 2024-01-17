@@ -2,7 +2,10 @@ import imaplib
 from datetime import datetime
 import smtplib
 from email.message import EmailMessage
-
+from selenium import webdriver
+from selenium.webdriver.chrome.service import Service
+from selenium.webdriver.common.by import By
+import time
 
 gmail_username = input("Enter your Gmail email address: ")
 gmail_password = input("Enter your email password (special for applications): ")
@@ -29,6 +32,28 @@ def get_count_of_emails(id, folder_code):
 
     result.append([id,len(message_ids)])
 
+def get_count_of_leaks(gmail_username):
+    service = Service()
+    option = webdriver.ChromeOptions()
+    driver = webdriver.Chrome(service=service, options=option)
+
+    url = "https://monitor.mozilla.org/"
+    driver.get(url)
+    time.sleep(2)
+
+    find = driver.find_element(By.ID, 'scan-email-address')
+    find.send_keys(gmail_username)
+    time.sleep(1)
+
+    find = driver.find_element(By.CLASS_NAME, 'button.primary')
+    find.click()
+    time.sleep(4)
+
+    find = driver.find_element(By.CLASS_NAME, 'breach-result-count')
+    count = find.get_attribute("textContent")
+    current_url = driver.current_url
+
+    result.append(['data breaches', count, current_url])
 
 email_codes = []
 for i in mail.list()[1]:
@@ -121,6 +146,15 @@ else:
     content.append("We've noticed that you like to talk to yourself. Do you often need an expert opinion?")
     content.append(f"The number of love letters sent to yourself: {result[5][1]}")
 
+
+content.append(" ")
+content.append(" ")
+get_count_of_leaks(gmail_username)
+content.append(f"We found that {gmail_username} was exposed in {result[6][1]} data breaches.")
+if result[6][1] == '⁨0⁩':
+    content.append("Congratulations! You clearly take great care of your safety!")
+else:
+    content.append(f"It's sad, check out the information on the website Mozilla Monitor {result[6][2]}")
 
 content.append(" ")
 content.append(" ")
